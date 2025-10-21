@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>You're Invited ✨</title>
+  <meta name="description" content="Tap to open—an interactive invitation pops out!" />
+  <style>
+    :root{ --accent:#7c5cff; --accent-2:#ffd166; --card:#fff8ef; --ink:#2b2b2b; }
+    *{box-sizing:border-box}
+    html,body{ margin:0; font-family:ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; color:#fff; background:transparent !important; display:grid; place-items:center; overflow-x:hidden; position:relative; }
+    body{ margin:0; font-family:ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; color:#fff; background: radial-gradient(1200px 700px at 75% -10%, #1b1d3a 0, #0f1020 60%, #0b0b18 100%); display:grid; place-items:center; overflow-x:hidden; }
+    .wrap{width:min(920px, 92vw); padding:24px 16px 48px; text-align:center;}
+    header{margin-bottom:18px; opacity:.95}
+    header h1{margin:0 0 6px; font-size: clamp(24px, 3.2vw, 36px)}
+    header p{margin:0; opacity:.85}
+
+    .scene{perspective:1200px; margin:26px auto 10px; width:min(560px, 92vw); min-height:260px;}
+
+    .envelope{ position:relative; width:100%; aspect-ratio: 4 / 3; border-radius:18px; transform-style:preserve-3d; transition: transform 1.2s cubic-bezier(.2,.8,.2,1); background: linear-gradient(180deg, #ffffff, #f5f6fb); box-shadow: 0 12px 40px rgba(0,0,0,.45), inset 0 0 0 1px rgba(0,0,0,.08); }
+    .flap{ position:absolute; inset:0; transform-origin: top center; background: linear-gradient(180deg, #ffffff 0%, #fafafa 60%, #f3f4f7 100%); border-radius:18px; clip-path: polygon(0 0, 100% 0, 50% 62%); box-shadow: inset 0 -40px 90px rgba(0,0,0,.10), inset 0 0 0 1px rgba(0,0,0,.06); transition: transform 1s cubic-bezier(.2,.8,.2,1); }
+
+    .pocket{ position:absolute; inset:0; border-radius:18px; overflow:hidden; background: linear-gradient(180deg, #ffffff, #f1f2f9 60%); box-shadow: inset 0 10px 30px rgba(0,0,0,.08); }
+
+    .card{ position:absolute; left:50%; bottom:8%; transform: translateX(-50%) translateY(20px) scale(.96) rotateX(6deg); width:86%; aspect-ratio: 7/5; border-radius:20px; background: radial-gradient(120% 100% at 10% 10%, #ffffff 0%, #f7f4ff 40%, #efe9ff 65%, #ffffff 100%); color: var(--ink); padding:20px; display:flex; flex-direction:column; justify-content:space-between; align-items:center; box-shadow: 0 16px 40px rgba(0,0,0,.35), inset 0 0 0 1px rgba(0,0,0,.06); opacity:0; pointer-events:none; }
+    .card.open{ animation: popout 850ms 300ms cubic-bezier(.2,1,.2,1) forwards; }
+    @keyframes popout{ 0%{opacity:0; transform: translateX(-50%) translateY(20px) scale(.9) rotateX(12deg)} 60%{opacity:1; transform: translateX(-50%) translateY(-16%) scale(1.02) rotateX(0deg)} 100%{opacity:1; transform: translateX(-50%) translateY(-12%) scale(1) rotateX(0deg)} }
+
+    .ribbon{ position:absolute; inset:auto 0 -12px 0; margin:auto; width:64%; height:12px; background:linear-gradient(90deg, var(--accent), var(--accent-2)); filter:blur(.3px); border-radius: 0 0 12px 12px;}
+    .title{font-size: clamp(20px, 2.6vw, 30px); font-weight:800}
+    .subtitle{margin-top:-6px; opacity:.8}
+    .details{display:grid; gap:8px; width:100%; margin:10px 0 0;}
+    .detail{display:flex; gap:10px; align-items:center; justify-content:center; font-size:clamp(14px,2vw,16px)}
+    .pill{ padding:6px 10px; border-radius:999px; background:#fff2d9; border:1px solid rgba(0,0,0,.07)}
+    .btn-row{display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin:8px 0 2px}
+    button, .link-btn{ appearance:none; border:0; cursor:pointer; border-radius:12px; padding:12px 16px; font-weight:700; background:linear-gradient(180deg, #ffffff, #f0eef9); color:#1b1642; box-shadow:0 6px 20px rgba(0,0,0,.12), inset 0 0 0 1px rgba(0,0,0,.06); }
+    button:active{transform:translateY(1px)} .link-btn{text-decoration:none}
+    .tap{margin-top:14px; opacity:.75; font-size:14px}
+
+    .envelope.open{ transform: translateZ(0) rotateX(14deg)} .envelope.open .flap{ transform: rotateX(-140deg)}
+
+    .seal{ position:absolute; left:50%; top:56%; transform: translate(-50%, -50%); width:200px; height:200px; z-index:5; display:grid; place-items:center; }
+    .seal-img{ width:100%; height:100%; object-fit:contain; filter: drop-shadow(0 4px 10px rgba(0,0,0,.3)); }
+    .envelope.open .seal{ opacity:.1; transform: translate(-50%, -50%) scale(.9); }
+
+    #confetti{position:fixed; inset:0; pointer-events:none; z-index: 20}
+
+    footer{margin-top:18px; opacity:.7; font-size:12px}
+
+    @media (max-width:460px){ .card{padding:16px} .details{gap:6px} .btn-row{gap:8px} .seal{width:160px; height:160px; top:58%} }
+
+    /* Background video styles */
+    .bgvid{ position:fixed; inset:0; z-index:-1; overflow:hidden;}
+    .bgvid video{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:saturate(105%) contrast(105%);} 
+    .bg-overlay{ position:absolute; inset:0; background: radial-gradient(1600px 900px at 75% -10%, rgba(0,0,0,.35) 0, rgba(0,0,0,.50) 60%, rgba(0,0,0,.65) 100%); z-index:1; }
+
+    /* Ensure no extra backgrounds */
+    html, body, .wrap, .scene, header{ background: transparent !important; } .details{gap:6px} .btn-row{gap:8px} .seal{width:160px; height:160px; top:58%} }
+
+    /* Background video styles */
+    .bgvid{ position:fixed; inset:0; z-index:-2; overflow:hidden;}
+    .bgvid video{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:saturate(105%) contrast(105%);} 
+    .bg-overlay{ position:absolute; inset:0; background: radial-gradient(1600px 900px at 75% -10%, rgba(0,0,0,.45) 0, rgba(0,0,0,.55) 60%, rgba(0,0,0,.75) 100%); z-index:1; } .details{gap:6px} .btn-row{gap:8px} .seal{width:160px; height:160px; top:58%} }
+  </style>
+</head>
+<body>
+  <!-- Looping background video -->
+  <div class="bgvid" aria-hidden="true">
+    <video id="bgVideo" autoplay muted loop playsinline poster="" preload="auto">
+      <source src="background.mp4" type="video/mp4" />
+    </video>
+    <div class="bg-overlay"></div>
+  </div>
+  <canvas id="confetti"></canvas>
+  <div class="wrap">
+    <header>
+      <h1>Tap to open your invitation</h1>
+      <p>Best viewed with sound on 🔊 (optional)</p>
+    </header>
+
+    <div class="scene">
+      <div class="envelope" id="envelope" aria-label="Interactive invitation envelope" role="button" tabindex="0">
+        <div class="pocket"></div>
+        <div class="flap"></div>
+        <div class="seal"><img class="seal-img" src="realisticseal.png" alt="Wax seal"></div>
+
+        <div class="card" id="card" aria-live="polite">
+          <div class="ribbon" aria-hidden="true"></div>
+          <div>
+            <div class="title" id="titleText">Sifat & Bisma</div>
+            <div class="subtitle" id="subtitleText">invite you to celebrate</div>
+          </div>
+          <div class="details">
+            <div class="detail"><span class="pill" id="dateText">Tuesday • 26 Nov 2025</span></div>
+            <div class="detail"><span class="pill" id="timeText">3:00 PM</span></div>
+            <div class="detail"><span class="pill" id="venueText">3 Craven Street, M5 4EE</span></div>
+          </div>
+          <div class="btn-row">
+            <a class="link-btn" id="rsvpBtn" href="#" target="_blank" rel="noopener">RSVP</a>
+            <button id="copyBtn" type="button" title="Copy this invite link">Copy Link</button>
+            <button id="shareBtn" type="button" title="Share via WhatsApp">Share</button>
+          </div>
+          <div class="tap">Tap outside the card to close</div>
+        </div>
+      </div>
+    </div>
+
+    <footer>Made with ❤️ — customize the text by editing this file (see JS config below)</footer>
+  </div>
+
+  <audio id="popSound" preload="auto">
+    <source src="data:audio/mp3;base64,//uQZAAAAAAAAAAAAAAAAAAAA..." type="audio/mpeg">
+  </audio>
+
+  <script>
+    const INVITE = { title: "Sifat & Bisma", subtitle: "invite you to celebrate", date: "Tuesday • 26 Nov 2025", time: "3:00 PM", venue: "3 Craven Street, M5 4EE", rsvpUrl: "https://example.com/rsvp", shareText: "You're invited! Tap to open the pop-out card: " };
+
+    const titleText = document.getElementById('titleText');
+    const subtitleText = document.getElementById('subtitleText');
+    const dateText = document.getElementById('dateText');
+    const timeText = document.getElementById('timeText');
+    const venueText = document.getElementById('venueText');
+    const rsvpBtn = document.getElementById('rsvpBtn');
+    titleText.textContent = INVITE.title; subtitleText.textContent = INVITE.subtitle; dateText.textContent = INVITE.date; timeText.textContent = INVITE.time; venueText.textContent = INVITE.venue; rsvpBtn.href = INVITE.rsvpUrl;
+
+    const envelope = document.getElementById('envelope');
+    const card = document.getElementById('card');
+    const popSound = document.getElementById('popSound');
+    let isOpen = false;
+    function openInvite(){ if(isOpen) return; isOpen = true; envelope.classList.add('open'); card.classList.add('open'); try{ popSound.currentTime = 0; popSound.play().catch(()=>{});}catch{} startConfetti(1200); }
+    function closeInvite(){ if(!isOpen) return; isOpen = false; envelope.classList.remove('open'); card.classList.remove('open'); stopConfetti(); }
+
+    envelope.addEventListener('click', (e)=>{ if(isOpen && !card.contains(e.target)) { closeInvite(); return; } if(!isOpen) openInvite(); });
+    envelope.addEventListener('keydown', (e)=>{ if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if(!isOpen) openInvite(); else closeInvite(); } if(e.key === 'Escape') closeInvite(); });
+
+    const shareBtn = document.getElementById('shareBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    function getShareUrl(){ return window.location.href; }
+    shareBtn.addEventListener('click', async ()=>{ const url = getShareUrl(); const text = `${INVITE.shareText}${url}`; const wa = `https://wa.me/?text=${encodeURIComponent(text)}`; if(navigator.share){ try{ await navigator.share({title: 'Invitation', text: INVITE.shareText, url}); return; }catch{} } window.open(wa, '_blank'); });
+    copyBtn.addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(getShareUrl()); copyBtn.textContent='Link Copied!'; setTimeout(()=>copyBtn.textContent='Copy Link',1500);}catch{ alert('Copy failed. Long-press the address bar to copy the link.'); } });
+
+    const canvas = document.getElementById('confetti');
+    const ctx = canvas.getContext('2d'); let confetti, rafId; function resize(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; } window.addEventListener('resize', resize); resize();
+    function spawnConfetti(count=120){ const colors=['#7c5cff','#ffd166','#4cc9f0','#f72585','#48e5c2','#ffee93']; confetti=new Array(count).fill().map(()=>({x:Math.random()*canvas.width,y:-10-Math.random()*canvas.height*0.2,r:3+Math.random()*5,s:2+Math.random()*3,a:Math.random()*Math.PI*2,c:colors[Math.floor(Math.random()*colors.length)]})); }
+    function draw(){ ctx.clearRect(0,0,canvas.width,canvas.height); confetti.forEach(p=>{ p.y+=p.s; p.x+=Math.sin(p.a+=0.03); if(p.y>canvas.height+20) p.y=-10; ctx.globalAlpha=.95; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fillStyle=p.c; ctx.fill();}); rafId=requestAnimationFrame(draw);} 
+    function startConfetti(duration=1500){ spawnConfetti(); draw(); setTimeout(()=> stopConfetti(), duration);} function stopConfetti(){ cancelAnimationFrame(rafId); ctx.clearRect(0,0,canvas.width,canvas.height); }
+
+    if(location.hash==='#open'){ openInvite(); }
+  </script>
+</body>
+</html>
