@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>You're Invited ✨</title>
+  <meta name="description" content="Tap to open—an interactive invitation pops out!" />
+  <style>
+    :root {
+      --accent: #7c5cff;
+      --accent-2: #ffd166;
+      --card: #fff8ef;
+      --ink: #2b2b2b;
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    html,
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      color: #fff;
+      background: transparent !important;
+      display: grid;
+      place-items: center;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Header + layout */
+    .wrap {
+      width: min(920px, 92vw);
+      padding: 24px 16px 48px;
+      text-align: center;
+      background: transparent
+    }
+
+    header {
+      margin-bottom: 18px;
+      opacity: .95
+    }
+
+    header h1 {
+      margin: 0 0 6px;
+      font-size: clamp(24px, 3.2vw, 36px)
+    }
+
+    header p {
+      margin: 0;
+      opacity: .85
+    }
+
+    /* Scene */
+    .scene {
+      perspective: 1200px;
+      margin: 26px auto 10px;
+      width: min(560px, 92vw);
+      min-height: 260px;
+      background: transparent
+    }
+
+    /* Envelope */
+    .envelope {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      border-radius: 18px;
+      transform-style: preserve-3d;
+      transition: transform 1.2s cubic-bezier(.2, .8, .2, 1);
+      background: linear-gradient(180deg, #ffffff, #f5f6fb);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, .45), inset 0 0 0 1px rgba(0, 0, 0, .08);
+      cursor: pointer;
+    }
+
+    .flap {
+      position: absolute;
+      inset: 0;
+      transform-origin: top center;
+      background: linear-gradient(180deg, #ffffff 0%, #fafafa 60%, #f3f4f7 100%);
+      border-radius: 18px;
+      clip-path: polygon(0 0, 100% 0, 50% 62%);
+      box-shadow: inset 0 -40px 90px rgba(0, 0, 0, .10), inset 0 0 0 1px rgba(0, 0, 0, .06);
+      transition: transform 1s cubic-bezier(.2, .8, .2, 1);
+    }
+
+    .pocket {
+      position: absolute;
+      inset: 0;
+      border-radius: 18px;
+      overflow: hidden;
+      background: linear-gradient(180deg, #ffffff, #f1f2f9 60%);
+      box-shadow: inset 0 10px 30px rgba(0, 0, 0, .08);
+    }
+
+    /* Card (image-only) */
+    .card {
+      position: absolute;
+      left: 50%;
+      bottom: 4%;
+      transform: translateX(-50%) translateY(10px) scale(.96) rotateX(4deg);
+      width: min(560px, 92vw);
+      max-height: 70vh;
+      border-radius: 22px;
+      padding: 14px;
+      background: radial-gradient(120% 100% at 10% 10%, #ffffff 0%, #f7f4ff 40%, #efe9ff 65%, #ffffff 100%);
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, .28);
+      overflow: hidden;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .card img.pop {
+      display: block;
+      width: auto;
+      height: auto;
+      max-width: 92%;
+      max-height: 92%;
+      object-fit: contain;
+      border-radius: 16px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, .15);
+    }
+
+    .card.open {
+      animation: popout 850ms 300ms cubic-bezier(.2, 1, .2, 1) forwards;
+    }
+
+    @keyframes popout {
+      0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(10px) scale(.9) rotateX(8deg)
+      }
+
+      60% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-6%) scale(1.02) rotateX(0deg)
+      }
+
+      100% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-4%) scale(1) rotateX(0deg)
+      }
+    }
+
+    /* Hide text/details blocks to keep visual image-only */
+    .title,
+    .subtitle,
+    .details,
+    .btn-row,
+    .tap {
+      display: none !important;
+    }
+
+    /* Seal */
+    .seal {
+      position: absolute;
+      left: 50%;
+      top: 56%;
+      transform: translate(-50%, -50%);
+      width: 200px;
+      height: 200px;
+      z-index: 5;
+      display: grid;
+      place-items: center;
+      transition: opacity .45s ease, transform .45s ease, visibility .45s ease;
+    }
+
+    .seal.hide {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .seal-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 10px rgba(0, 0, 0, .3));
+    }
+
+    .envelope.open .seal {
+      transform: translate(-50%, -50%) scale(.9);
+    }
+
+    /* Confetti */
+    #confetti {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 20
+    }
+
+    footer {
+      margin-top: 18px;
+      opacity: .7;
+      font-size: 12px;
+      background: transparent
+    }
+
+    /* Background video styles */
+    .bgvid {
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      overflow: hidden;
+    }
+
+    .bgvid video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: saturate(105%) contrast(105%);
+    }
+
+    .bg-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, .12);
+      z-index: 1;
+      pointer-events: none;
+      display: block;
+    }
+
+    @media (max-width:600px) {
+      .wrap {
+        width: 100vw;
+        padding: 12px 8px 12px
+      }
+
+      header {
+        margin-bottom: 6px
+      }
+
+      header h1 {
+        font-size: clamp(18px, 5.4vw, 22px)
+      }
+
+      .scene {
+        width: min(560px, 96vw);
+        margin: 6px auto 0
+      }
+
+      /* Move the popped-out card lower and allow more height on phones */
+      .card {
+        width: 88vw;
+        max-height: 70svh;
+        bottom: -8%;
+        border-radius: 18px;
+        padding: 12px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, .28)
+      }
+
+      .card img.pop {
+        max-width: 92%;
+        max-height: 92%;
+        border-radius: 12px
+      }
+
+      .seal {
+        width: 150px;
+        height: 150px;
+        top: 60%
+      }
+
+      footer {
+        display: none
+      }
+    }
+
+    @media (max-width:360px) {
+      .card {
+        max-height: 68svh;
+        bottom: -10%
+      }
+
+      .seal {
+        width: 130px;
+        height: 130px;
+        top: 61%
+      }
+    }
+
+    .seal {
+      width: 150px;
+      height: 150px;
+      top: 58%;
+    }
+
+    .bg-overlay {
+      background: rgba(0, 0, 0, .10);
+    }
+
+
+    /* Use more of the screen on iPhone XR and other phones */
+    @media (max-width:430px) {
+
+      /* Fill the viewport and center the envelope */
+      .wrap {
+        width: 100vw;
+        padding: 8px;
+        height: 100svh;
+        /* small-viewport height = safe on mobile */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      header {
+        display: none;
+      }
+
+      /* free up vertical space */
+
+      .scene {
+        width: 100%;
+        margin: 0;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .envelope {
+        width: 94vw;
+      }
+
+      /* scale envelope to viewport width */
+
+      /* Pop-out card sits a bit lower and can be taller */
+      .card {
+        width: 94vw;
+        max-height: 78svh;
+        bottom: -6%;
+        border-radius: 18px;
+        padding: 12px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, .28);
+      }
+
+      .card img.pop {
+        max-width: 92%;
+        max-height: 92%;
+        border-radius: 12px;
+      }
+
+      .seal {
+        width: 140px;
+        height: 140px;
+        top: 60%;
+      }
+
+      footer {
+        display: none;
+      }
+
+      /* no footer on phones */
+    }
+
+    @media (min-width:421px) and (max-width:440px) and (max-height:1000px) {
+      .wrap {
+        width: 100vw;
+        padding: 10px 8px;
+        height: 100svh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center
+      }
+
+      header {
+        display: none
+      }
+
+      .scene {
+        width: 100%;
+        margin: 0;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center
+      }
+
+      .envelope {
+        width: 92vw;
+      }
+
+      .card {
+        width: 92vw;
+        max-height: 80svh;
+        bottom: -6%;
+        border-radius: 18px;
+        padding: 12px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, .28)
+      }
+
+      .card img.pop {
+        max-width: 92%;
+        max-height: 92%;
+        border-radius: 12px
+      }
+
+      .seal {
+        width: 160px;
+        height: 160px;
+        top: 60%
+      }
+
+      footer {
+        display: none
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Looping background video -->
+  <div class="bgvid" aria-hidden="true">
+    <video id="bgVideo" autoplay muted loop playsinline poster="" preload="auto">
+      <source src="background.mp4" type="video/mp4" />
+    </video>
+    <div class="bg-overlay"></div>
+  </div>
+
+  <canvas id="confetti"></canvas>
+  <div class="wrap">
+    <header>
+      <h1>Tap to open your invitation</h1>
+
+    </header>
+
+    <div class="scene">
+      <div class="envelope" id="envelope" aria-label="Interactive invitation envelope" role="button" tabindex="0">
+        <div class="pocket"></div>
+        <div class="flap"></div>
+        <div class="seal"><img class="seal-img" src="realisticseal.png" alt="Wax seal"></div>
+
+        <div class="card" id="card" aria-live="polite">
+          <img id="heroImg" class="pop" alt="Invitation image">
+        </div>
+
+        <!-- Hidden text/detail blocks preserved in DOM but not shown -->
+        <div>
+          <div class="title" id="titleText">Sifat & Bisma</div>
+          <div class="subtitle" id="subtitleText">invite you to celebrate</div>
+        </div>
+        <div class="details">
+          <div class="detail"><span class="pill" id="dateText">Tuesday • 26 Nov 2025</span></div>
+          <div class="detail"><span class="pill" id="timeText">3:00 PM</span></div>
+          <div class="detail"><span class="pill" id="venueText">3 Craven Street, M5 4EE</span></div>
+        </div>
+        <div class="btn-row">
+          <a class="link-btn" id="rsvpBtn" href="#" target="_blank" rel="noopener">RSVP</a>
+          <button id="copyBtn" type="button" title="Copy this invite link">Copy Link</button>
+          <button id="shareBtn" type="button" title="Share via WhatsApp">Share</button>
+        </div>
+        <div class="tap">Tap outside the card to close</div>
+      </div>
+    </div>
+
+    <footer>Made with ❤️ — customize the text by editing this file (see JS config below)</footer>
+  </div>
+
+  <audio id="popSound" preload="auto">
+    <source src="data:audio/mp3;base64,//uQZAAAAAAAAAAAAAAAAAAAA..." type="audio/mpeg">
+  </audio>
+
+  <script>
+    const INVITE = { title: "Sifat & Bisma", subtitle: "invite you to celebrate", date: "Tuesday • 26 Nov 2025", time: "3:00 PM", venue: "3 Craven Street, M5 4EE", rsvpUrl: "https://example.com/rsvp", shareText: "You're invited! Tap to open the pop-out card: ", heroSrc: "invite.jpg" };
+
+    // Apply text config (even though hidden — keeps future flexibility)
+    const titleText = document.getElementById('titleText');
+    const subtitleText = document.getElementById('subtitleText');
+    const dateText = document.getElementById('dateText');
+    const timeText = document.getElementById('timeText');
+    const venueText = document.getElementById('venueText');
+    const rsvpBtn = document.getElementById('rsvpBtn');
+    if (titleText) titleText.textContent = INVITE.title;
+    if (subtitleText) subtitleText.textContent = INVITE.subtitle;
+    if (dateText) dateText.textContent = INVITE.date;
+    if (timeText) timeText.textContent = INVITE.time;
+    if (venueText) venueText.textContent = INVITE.venue;
+    if (rsvpBtn) rsvpBtn.href = INVITE.rsvpUrl;
+
+    // Load hero image safely
+    const heroImg = document.getElementById('heroImg');
+    if (INVITE.heroSrc && heroImg) { heroImg.src = INVITE.heroSrc; heroImg.addEventListener('error', () => { heroImg.alt = '(Add invite.jpg next to this HTML)'; }); }
+
+    // Envelope open/close
+    const envelope = document.getElementById('envelope');
+    const card = document.getElementById('card');
+    const popSound = document.getElementById('popSound');
+    let isOpen = false; const sealEl = document.querySelector('.seal');
+    function openInvite() { if (isOpen) return; isOpen = true; envelope.classList.add('open'); card.classList.add('open'); try { popSound.currentTime = 0; popSound.play().catch(() => { }); } catch { } startConfetti(1200); if (sealEl) { sealEl.classList.add('hide'); } }
+    function closeInvite() { if (!isOpen) return; isOpen = false; envelope.classList.remove('open'); card.classList.remove('open'); stopConfetti(); if (sealEl) { sealEl.classList.remove('hide'); } }
+
+    envelope.addEventListener('click', (e) => { if (isOpen && !card.contains(e.target)) { closeInvite(); return; } if (!isOpen) openInvite(); });
+    envelope.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (!isOpen) openInvite(); else closeInvite(); } if (e.key === 'Escape') closeInvite(); });
+
+    // Share & copy
+    const shareBtn = document.getElementById('shareBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    function getShareUrl() { return window.location.href; }
+    if (shareBtn) shareBtn.addEventListener('click', async () => { const url = getShareUrl(); const text = `${INVITE.shareText}${url}`; const wa = `https://wa.me/?text=${encodeURIComponent(text)}`; if (navigator.share) { try { await navigator.share({ title: 'Invitation', text: INVITE.shareText, url }); return; } catch { } } window.open(wa, '_blank'); });
+    if (copyBtn) copyBtn.addEventListener('click', async () => { try { await navigator.clipboard.writeText(getShareUrl()); copyBtn.textContent = 'Link Copied!'; setTimeout(() => copyBtn.textContent = 'Copy Link', 1500); } catch { alert('Copy failed. Long-press the address bar to copy the link.'); } });
+
+    // Confetti
+    const canvas = document.getElementById('confetti');
+    const ctx = canvas.getContext('2d'); let confetti, rafId; function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; } window.addEventListener('resize', resize); resize();
+    function spawnConfetti(count = 120) { const colors = ['#7c5cff', '#ffd166', '#4cc9f0', '#f72585', '#48e5c2', '#ffee93']; confetti = new Array(count).fill().map(() => ({ x: Math.random() * canvas.width, y: -10 - Math.random() * canvas.height * 0.2, r: 3 + Math.random() * 5, s: 2 + Math.random() * 3, a: Math.random() * Math.PI * 2, c: colors[Math.floor(Math.random() * colors.length)] })); }
+    function draw() { ctx.clearRect(0, 0, canvas.width, canvas.height); confetti.forEach(p => { p.y += p.s; p.x += Math.sin(p.a += 0.03); if (p.y > canvas.height + 20) p.y = -10; ctx.globalAlpha = .95; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fillStyle = p.c; ctx.fill(); }); rafId = requestAnimationFrame(draw); }
+    function startConfetti(duration = 1500) { spawnConfetti(); draw(); setTimeout(() => stopConfetti(), duration); } function stopConfetti() { cancelAnimationFrame(rafId); ctx.clearRect(0, 0, canvas.width, canvas.height); }
+
+    if (location.hash === '#open') { openInvite(); }
+  </script>
+</body>
+
+</html>
